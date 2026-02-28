@@ -1,0 +1,30 @@
+import requests
+from bs4 import BeautifulSoup
+
+TOKEN = "8799057966:AAFEL99TlcPsjsXyg5quZylH1G6fl3Y8fSA"
+CHAT_ID = "7472573760"
+AMAZON_URL = "https://amzn.eu/d/040WtIvv"
+TARGET_PRICE = 130.0
+
+def check_price():
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        "Accept-Language": "ar-EG,ar;q=0.9,en-US;q=0.8,en;q=0.7",
+    }
+    
+    try:
+        response = requests.get(AMAZON_URL, headers=headers)
+        soup = BeautifulSoup(response.content, "html.parser")
+        price_element = soup.find("span", {"class": "a-price-whole"})
+        
+        if price_element:
+            current_price = float(price_element.text.replace(",", "").strip())
+            
+            if current_price <= TARGET_PRICE:
+                msg = f"🔥 السعر نزل للرقم اللي طلبته!\nالسعر الحالي: {current_price} جنيه\nالحق اشتري من هنا: {AMAZON_URL}"
+                requests.post(f"https://api.telegram.org/bot{TOKEN}/sendMessage", data={"chat_id": CHAT_ID, "text": msg})
+    except:
+        pass
+
+if __name__ == "__main__":
+    check_price()
